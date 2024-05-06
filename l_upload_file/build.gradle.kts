@@ -1,18 +1,15 @@
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
 }
 
 android {
-    namespace = "com.test.android"
+    namespace = "com.test.l_upload_file"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.test.android"
         minSdk = 26
-        targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -34,9 +31,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":l_upload_file"))
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.blankj:utilcodex:1.31.1")
 }

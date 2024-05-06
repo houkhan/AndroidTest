@@ -1,8 +1,9 @@
-package com.test.androidtest
+package com.test.android
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.test.androidtest.databinding.ActivityTestMainBinding
+import com.test.android.databinding.ActivityTestMainBinding
+import com.test.l_upload_file.UploadFileActivity
 
 /**
  * @Author : hss
@@ -22,7 +23,7 @@ class TestMainActivity : AppCompatActivity() {
     private fun setOnClickListener() {
         mBinding.apply {
             btnTestUploadFile.setOnClickListener {
-
+                UploadFileActivity.start(this@TestMainActivity)
             }
         }
     }

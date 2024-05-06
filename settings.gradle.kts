@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AndroidTest"
 include(":app")
- 
+include(":l_upload_file")
