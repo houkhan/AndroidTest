@@ -1,12 +1,16 @@
 package com.test.l_upload_file
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import coil.load
 import com.blankj.utilcode.util.FileUtils
+import com.blankj.utilcode.util.ImageUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.blankj.utilcode.util.UriUtils
@@ -39,16 +43,19 @@ class UploadFileActivity : AppCompatActivity() {
 
     private fun setOnClick() {
         mBinding.apply {
-            btnUploadFile.setOnClickListener {
-                selectComplainFile()
+            btnUploadFileOld.setOnClickListener {
+                selectComplainFileOld()
+            }
+            btnUploadFileNew.setOnClickListener {
+                selectComplainFileNew()
             }
         }
     }
 
     /**
-     * 选择文件
+     *  上传文件 旧版API startActivityForResult
      */
-    private fun selectComplainFile() {
+    private fun selectComplainFileOld() {
         val intent = Intent()
         intent.action = Intent.ACTION_GET_CONTENT
         intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -65,7 +72,9 @@ class UploadFileActivity : AppCompatActivity() {
         }
     }
 
-
+    /**
+     *  上传文件 旧版API startActivityForResult
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_UPLOAD_FILE) {
@@ -73,6 +82,37 @@ class UploadFileActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     *  上传文件 新版API registerForActivityResult
+     */
+    private var selectComplainFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val resultCode = result.resultCode
+        val data = result.data
+        if (resultCode == Activity.RESULT_OK) {
+            selectComplainFileComplete(resultCode, data)
+        }
+    }
+
+    /**
+     *  上传文件 新版API registerForActivityResult
+     */
+    private fun selectComplainFileNew() {
+        val intent = Intent()
+        intent.action = Intent.ACTION_GET_CONTENT
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "*/*"
+        intent.flags = Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+        try {
+            selectComplainFileLauncher.launch(Intent.createChooser(intent, "请选择文件"))
+        } catch (e: ActivityNotFoundException) {
+            ToastUtils.showShort("请安装文件管理器")
+        }
+    }
+
+    /**
+     * 选择文件完成
+     */
     private fun selectComplainFileComplete(resultCode: Int, data: Intent?) {
         try {
             if (resultCode != -1) {
@@ -80,7 +120,7 @@ class UploadFileActivity : AppCompatActivity() {
             }
             val selectFileUri = data?.data
             if (selectFileUri != null) {
-                printFileInfo(selectFileUri)
+                showFileInfo(selectFileUri)
             }
         } catch (e: Exception) {
             ToastUtils.showShort("该文件无法上传")
@@ -88,13 +128,22 @@ class UploadFileActivity : AppCompatActivity() {
         }
     }
 
-    private fun printFileInfo(selectFileUri: Uri) {
+    /**
+     * 此处展示 文件信息
+     * 采用 blankj utilcode
+     * UriUtils.uri2File 将 uri 转换为 file
+     * UriUtils.uri2FileNoCacheCopy 测试 会出现 null 推荐使用 UriUtils.uri2File
+     */
+    private fun showFileInfo(selectFileUri: Uri) {
         mBinding.tvUploadFileInfo.append("selectFileUri == $selectFileUri\n")
         try {
             val uri2File = UriUtils.uri2File(selectFileUri)
             mBinding.tvUploadFileInfo.append("uri2File == ${FileUtils.getFileMD5ToString(uri2File)}\n")
+            if (ImageUtils.isImage(uri2File)) {
+                mBinding.ivUploadFileInfo.load(uri2File)
+            }
         } catch (e: IOException) {
-            LogUtils.eTag(TAG, "printFileInfo", e)
+            LogUtils.eTag(TAG, "showFileInfo", e)
         }
     }
 }
